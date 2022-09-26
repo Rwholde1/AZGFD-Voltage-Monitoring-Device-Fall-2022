@@ -1,0 +1,23 @@
+{
+  "name": "azgfd-website",
+  "version": "1.0.0",
+  "description": "website for the AZGFD Voltage Monitoring device",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cross-env NODE_ENV=production node app",
+    "devStart": "cross-env NODE_ENV=development nodemon app.js"
+  },
+  "author": "Tav#7021",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "nodemon": "^2.0.20"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "express-handlebars": "^6.0.6",
+    "handlebars": "^4.7.7"
+  }
+}

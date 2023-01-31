@@ -9,7 +9,7 @@ from gpiozero import CPUTemperature
 SMTP_SERVER = 'smtp.gmail.com'              #Email Server (don't change!)
 SMTP_PORT = 587                             #Server Port (don't change!)
 GMAIL_USERNAME = 'voltmeterazgfd@gmail.com' #change this to match your gmail account
-GMAIL_PASSWORD = 'asuEPICS2021'             #change this to match your gmail password
+GMAIL_PASSWORD = 'asuEPICS2023!'             #change this to match your gmail password
 emailSubject = "SMS Alert"
 
 MAX_VOLTS = 130.0

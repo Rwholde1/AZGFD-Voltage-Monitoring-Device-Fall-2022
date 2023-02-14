@@ -1,6 +1,6 @@
 import serial, time, smtplib, gspread, csv, socket, os, sys
 import requests, json, urllib
-import pytextnow
+from twilio.rest import Client
 from datetime import datetime
 from gpiozero import CPUTemperature
 
@@ -12,14 +12,26 @@ GMAIL_USERNAME = 'voltmeterazgfd@gmail.com' #change this to match your gmail acc
 GMAIL_PASSWORD = 'asuEPICS2023!'             #change this to match your gmail password
 emailSubject = "SMS Alert"
 
+# Message using twilio
+account_sid = 'ACfbe365f13dc7f6f8cdec26fc68fc3195'
+auth_token = '4b77e0347770efe28a39e1479351d536'
+
+# Twilio phone number and recipient phone number
+twilio_number = '+1 812 398 7121' # Your Twilio phone number
+recipient_number = '+1 602 615 3692' # Recipient's phone number
+
+
+message = 'Hi'
+
+client = Client(account_sid, auth_token)
+
+
 MAX_VOLTS = 130.0
 MIN_VOLTS = 110.0
 
 MAX_FREQ = 65.0
 MIN_FREQ = 55.0
 
-number1 = "6026153692"
-number2 = "3162109128"
 
 consecutiveOB = 5
 outOfBoundsV = 0
@@ -27,8 +39,6 @@ outOfBoundsF = 0
 readError = 0
 maxErrors = 4
 
-# textnow
-client = pytextnow.Client("voltmeterazgfd", "s%3As2im46Bq2CRkNHKNg1hLf6iJLG_dFoD3.Ff1minkuVvQfxYKlZQYea7KbW9nOHjjuUbVy%2Bokt%2BUs", "s%3AdGOyx3y6WK07laRLUcb7yPbU.n2nJeTvOcL7iNWR0JqCWV5hBlkb2PX1UxqOcWu2foKw")
 
 # setup access to spreadsheet
 gc = gspread.service_account(filename='/home/pi/Documents/credentials.json')
@@ -98,8 +108,8 @@ if __name__ == '__main__':
 					
 					emailContent = "".join(("Voltage critically high: ", voltage, " volts. Measurement taken at ", dt))
 					
-					client.send_sms(number1, emailContent)
-					client.send_sms(number2, emailContent)
+					# client.send_sms(number1, emailContent)
+					# client.send_sms(number2, emailContent)
 					
 					updateSheet([voltage, freq, dt, "Voltage too high"])
 					
@@ -176,3 +186,10 @@ if __name__ == '__main__':
 			print(int(endT-startT), "seconds")
 			
 			#print(end-start)
+
+message = client.messages.create(
+    to=recipient_number,
+    from_=twilio_number,
+    body=message)
+
+print('Message SID:', message.sid)

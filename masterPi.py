@@ -1,5 +1,6 @@
 import serial, time, smtplib, gspread, csv, socket, os, sys
 import requests, json, urllib
+# import pytextnow
 from twilio.rest import Client
 from datetime import datetime
 from gpiozero import CPUTemperature
@@ -11,6 +12,13 @@ SMTP_PORT = 587                             #Server Port (don't change!)
 GMAIL_USERNAME = 'voltmeterazgfd@gmail.com' #change this to match your gmail account
 GMAIL_PASSWORD = 'asuEPICS2023!'             #change this to match your gmail password
 emailSubject = "SMS Alert"
+
+# number1 = "6026153692"
+# number2 = "3162109128"
+
+# # textnow
+# client = pytextnow.Client("voltmeterazgfd", "s%3As2im46Bq2CRkNHKNg1hLf6iJLG_dFoD3.Ff1minkuVvQfxYKlZQYea7KbW9nOHjjuUbVy%2Bokt%2BUs", "s%3AdGOyx3y6WK07laRLUcb7yPbU.n2nJeTvOcL7iNWR0JqCWV5hBlkb2PX1UxqOcWu2foKw")
+
 
 # Message using twilio
 account_sid = 'ACfbe365f13dc7f6f8cdec26fc68fc3195'
@@ -108,6 +116,13 @@ if __name__ == '__main__':
 					
 					emailContent = "".join(("Voltage critically high: ", voltage, " volts. Measurement taken at ", dt))
 					
+					message = emailContent
+					message = client.messages.create(
+    								to=recipient_number,
+    								from_=twilio_number,
+    								body=message)
+
+					print('Message SID:', message.sid)
 					# client.send_sms(number1, emailContent)
 					# client.send_sms(number2, emailContent)
 					
@@ -126,8 +141,15 @@ if __name__ == '__main__':
 					
 					emailContent = "".join(("Voltage critically low: ", voltage, " volts. Measurement taken at ", dt))
 
-					client.send_sms(number1, emailContent)
-					client.send_sms(number2, emailContent)
+					message = emailContent
+					message = client.messages.create(
+    								to=recipient_number,
+    								from_=twilio_number,
+    								body=message)
+
+					print('Message SID:', message.sid)
+					# client.send_sms(number1, emailContent)
+					# client.send_sms(number2, emailContent)
 
 					
 					updateSheet([voltage, freq, dt, "Voltage too low"])
@@ -145,8 +167,15 @@ if __name__ == '__main__':
 					
 					emailContent = "".join(("Frequency critically high: ", freq, " Hz. Measurement taken at ", dt))
 
-					client.send_sms(number1, emailContent)
-					client.send_sms(number2, emailContent)
+					message = emailContent
+					message = client.messages.create(
+    								to=recipient_number,
+    								from_=twilio_number,
+    								body=message)
+
+					print('Message SID:', message.sid)
+					# client.send_sms(number1, emailContent)
+					# client.send_sms(number2, emailContent)
 
 					
 					updateSheet([voltage, freq, dt, "Freq too high"])
@@ -164,8 +193,16 @@ if __name__ == '__main__':
 					
 					emailContent = "".join(("Frequency critically low: ", freq, " Hz. Measurement taken at ", dt))
 
-					client.send_sms(number1, emailContent)
-					client.send_sms(number2, emailContent)
+					# client.send_sms(number1, emailContent)
+					# client.send_sms(number2, emailContent)
+
+					message = emailContent
+					message = client.messages.create(
+    								to=recipient_number,
+    								from_=twilio_number,
+    								body=message)
+
+					print('Message SID:', message.sid)
 
 					
 					updateSheet([voltage, freq, dt, "Freq too low"])
@@ -186,10 +223,3 @@ if __name__ == '__main__':
 			print(int(endT-startT), "seconds")
 			
 			#print(end-start)
-
-message = client.messages.create(
-    to=recipient_number,
-    from_=twilio_number,
-    body=message)
-
-print('Message SID:', message.sid)

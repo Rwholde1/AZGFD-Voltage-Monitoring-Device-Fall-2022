@@ -1,7 +1,1 @@
-wget -qO- https://twilio-cli-prod.s3.amazonaws.com/twilio_pub.asc \
-  | sudo apt-key add -
-sudo touch /etc/apt/sources.list.d/twilio.list
-echo 'deb https://twilio-cli-prod.s3.amazonaws.com/apt/ /' \
-  | sudo tee /etc/apt/sources.list.d/twilio.list
-sudo apt update
-sudo apt install -y twilio
+https://www.twilio.com/docs/twilio-cli/getting-started/install#:~:text=browser%2C%20download%20the-,latest%20.deb%20file,-.

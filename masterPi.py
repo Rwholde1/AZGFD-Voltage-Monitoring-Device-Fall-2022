@@ -26,7 +26,7 @@ auth_token = '4b77e0347770efe28a39e1479351d536'
 
 # Twilio phone number and recipient phone number
 twilio_number = '+1 812 398 7121' # Your Twilio phone number
-recipient_number = '+1 602 615 3692' # Recipient's phone number
+recipient_numbers = ['+1 602 615 3692', '+1 425 365 7514'] # Recipient's phone number
 
 
 message = 'Hi'
@@ -117,12 +117,21 @@ if __name__ == '__main__':
 					emailContent = "".join(("Voltage critically high: ", voltage, " volts. Measurement taken at ", dt))
 					
 					message = emailContent
-					message = client.messages.create(
-    								to=recipient_number,
-    								from_=twilio_number,
-    								body=message)
 
-					print('Message SID:', message.sid)
+					for recipient_numbers in recipient_numbers:
+						message = client.messages.create(
+        								to=recipient_numbers,
+        								from_=twilio_number,
+        								body=message
+										)
+						print('Message sent to', recipient_numbers, 'with SID:', message.sid, '\n')
+					
+					# message = client.messages.create(
+    				# 				to=recipient_number,
+    				# 				from_=twilio_number,
+    				# 				body=message)
+
+					# print('Message SID:', message.sid)
 					# client.send_sms(number1, emailContent)
 					# client.send_sms(number2, emailContent)
 					
@@ -142,12 +151,20 @@ if __name__ == '__main__':
 					emailContent = "".join(("Voltage critically low: ", voltage, " volts. Measurement taken at ", dt))
 
 					message = emailContent
-					message = client.messages.create(
-    								to=recipient_number,
-    								from_=twilio_number,
-    								body=message)
 
-					print('Message SID:', message.sid)
+					for recipient_numbers in recipient_numbers:
+						message = client.messages.create(
+        								to=recipient_numbers,
+        								from_=twilio_number,
+        								body=message
+										)
+						print('Message sent to', recipient_numbers, 'with SID:', message.sid, '\n')
+					# message = client.messages.create(
+    				# 				to=recipient_number,
+    				# 				from_=twilio_number,
+    				# 				body=message)
+
+					# print('Message SID:', message.sid)
 					# client.send_sms(number1, emailContent)
 					# client.send_sms(number2, emailContent)
 
@@ -168,12 +185,20 @@ if __name__ == '__main__':
 					emailContent = "".join(("Frequency critically high: ", freq, " Hz. Measurement taken at ", dt))
 
 					message = emailContent
-					message = client.messages.create(
-    								to=recipient_number,
-    								from_=twilio_number,
-    								body=message)
 
-					print('Message SID:', message.sid)
+					for recipient_numbers in recipient_numbers:
+						message = client.messages.create(
+        								to=recipient_numbers,
+        								from_=twilio_number,
+        								body=message
+										)
+						print('Message sent to', recipient_numbers, 'with SID:', message.sid, '\n')
+					# message = client.messages.create(
+    				# 				to=recipient_number,
+    				# 				from_=twilio_number,
+    				# 				body=message)
+
+					# print('Message SID:', message.sid)
 					# client.send_sms(number1, emailContent)
 					# client.send_sms(number2, emailContent)
 
@@ -197,12 +222,19 @@ if __name__ == '__main__':
 					# client.send_sms(number2, emailContent)
 
 					message = emailContent
-					message = client.messages.create(
-    								to=recipient_number,
-    								from_=twilio_number,
-    								body=message)
+					# message = client.messages.create(
+    				# 				to=recipient_number,
+    				# 				from_=twilio_number,
+    				# 				body=message)
 
-					print('Message SID:', message.sid)
+					# print('Message SID:', message.sid)
+					for recipient_numbers in recipient_numbers:
+						message = client.messages.create(
+        								to=recipient_numbers,
+        								from_=twilio_number,
+        								body=message
+										)
+						print('Message sent to', recipient_numbers, 'with SID:', message.sid, '\n')
 
 					
 					updateSheet([voltage, freq, dt, "Freq too low"])

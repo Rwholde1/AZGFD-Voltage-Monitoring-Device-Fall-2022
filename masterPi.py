@@ -1,6 +1,5 @@
-import serial, time, smtplib, gspread, csv, socket, os, sys
+import serial, time, smtplib, csv, socket, os, sys
 import requests, json, urllib
-# import pytextnow
 from twilio.rest import Client
 from datetime import datetime
 from gpiozero import CPUTemperature
@@ -13,13 +12,6 @@ GMAIL_USERNAME = 'voltmeterazgfd@gmail.com' #change this to match your gmail acc
 GMAIL_PASSWORD = 'asuEPICS2023!'             #change this to match your gmail password
 emailSubject = "SMS Alert"
 
-# number1 = "6026153692"
-# number2 = "3162109128"
-
-# # textnow
-# client = pytextnow.Client("voltmeterazgfd", "s%3As2im46Bq2CRkNHKNg1hLf6iJLG_dFoD3.Ff1minkuVvQfxYKlZQYea7KbW9nOHjjuUbVy%2Bokt%2BUs", "s%3AdGOyx3y6WK07laRLUcb7yPbU.n2nJeTvOcL7iNWR0JqCWV5hBlkb2PX1UxqOcWu2foKw")
-
-
 # Message using twilio
 account_sid = 'ACfbe365f13dc7f6f8cdec26fc68fc3195'
 auth_token = '4b77e0347770efe28a39e1479351d536'
@@ -28,11 +20,10 @@ auth_token = '4b77e0347770efe28a39e1479351d536'
 twilio_number = '+1 812 398 7121' # Your Twilio phone number
 recipient_numbers = ['+1 602 615 3692', '+1 425 365 7514'] # Recipient's phone number
 
-
+# Store the mesasges that we want to send
 message = 'Hi'
 
 client = Client(account_sid, auth_token)
-
 
 MAX_VOLTS = 130.0
 MIN_VOLTS = 110.0
@@ -40,34 +31,17 @@ MIN_VOLTS = 110.0
 MAX_FREQ = 65.0
 MIN_FREQ = 55.0
 
-
 consecutiveOB = 5
 outOfBoundsV = 0
 outOfBoundsF = 0
 readError = 0
 maxErrors = 4
 
-
-# setup access to spreadsheet
-gc = gspread.service_account(filename='/home/pi/Documents/credentials.json')
-sh = gc.open_by_key('1_RyT4Af2-h3I4QhH54W8xKC2mMbebXPHp1qDH9N4BL8')
-
 def getDateTime():
 	now = datetime.now()
 	dt_string = now.strftime("%m/%d/%Y %H:%M:%S")
 	return dt_string
-	
 
-def updateSheet(info):
-	# find next available row on the spreadsheet
-	worksheet = sh.sheet1
-	str_list = list(filter(None, worksheet.col_values(1)))
-	n = len(str_list)+1
-	
-	# insert the info into the empty row
-	worksheet.insert_row(info, n)
-	pass
-	
 
 if __name__ == '__main__':
 	
@@ -125,18 +99,6 @@ if __name__ == '__main__':
         								body=message
 										)
 						print('Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
-					
-					# message = client.messages.create(
-    				# 				to=recipient_number,
-    				# 				from_=twilio_number,
-    				# 				body=message)
-
-					# print('Message SID:', message.sid)
-					# client.send_sms(number1, emailContent)
-					# client.send_sms(number2, emailContent)
-					
-					updateSheet([voltage, freq, dt, "Voltage too high"])
-					
 					outOfBoundsV = 0
 						
 			# voltage too low
@@ -159,17 +121,6 @@ if __name__ == '__main__':
         								body=message
 										)
 						print('Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
-					# message = client.messages.create(
-    				# 				to=recipient_number,
-    				# 				from_=twilio_number,
-    				# 				body=message)
-
-					# print('Message SID:', message.sid)
-					# client.send_sms(number1, emailContent)
-					# client.send_sms(number2, emailContent)
-
-					
-					updateSheet([voltage, freq, dt, "Voltage too low"])
 					
 					outOfBoundsV = 0
 					
@@ -193,17 +144,6 @@ if __name__ == '__main__':
         								body=message
 										)
 						print('Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
-					# message = client.messages.create(
-    				# 				to=recipient_number,
-    				# 				from_=twilio_number,
-    				# 				body=message)
-
-					# print('Message SID:', message.sid)
-					# client.send_sms(number1, emailContent)
-					# client.send_sms(number2, emailContent)
-
-					
-					updateSheet([voltage, freq, dt, "Freq too high"])
 					
 					outOfBoundsF = 0
 				
@@ -218,16 +158,7 @@ if __name__ == '__main__':
 					
 					emailContent = "".join(("Frequency critically low: ", freq, " Hz. Measurement taken at ", dt))
 
-					# client.send_sms(number1, emailContent)
-					# client.send_sms(number2, emailContent)
-
 					message = emailContent
-					# message = client.messages.create(
-    				# 				to=recipient_number,
-    				# 				from_=twilio_number,
-    				# 				body=message)
-
-					# print('Message SID:', message.sid)
 					for recipient_numbers in recipient_numbers:
 						m = client.messages.create(
         								to=recipient_numbers,
@@ -235,9 +166,6 @@ if __name__ == '__main__':
         								body=message
 										)
 						print('Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
-
-					
-					updateSheet([voltage, freq, dt, "Freq too low"])
 					
 					outOfBoundsF = 0
 			

@@ -31,6 +31,7 @@ MIN_VOLTS = 110.0
 MAX_FREQ = 65.0
 MIN_FREQ = 55.0
 
+
 consecutiveOB = 5
 outOfBoundsV = 0
 outOfBoundsF = 0
@@ -49,7 +50,7 @@ if __name__ == '__main__':
 	while True:
 		try:
 			ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-			ser.reset_input_buffer();
+			ser.reset_input_buffer()
 			break
 			
 		# Oops! You forgot to plug in the Arduino
@@ -75,6 +76,7 @@ if __name__ == '__main__':
 			voltage = ser.readline().decode('utf-8').rstrip()
 			print(voltage + " Volts")
 			
+			ser.write(b'FREQ?\n')
 			freq = ser.readline().decode('utf-8').rstrip()
 			print(freq + " Hz")
 			

@@ -119,12 +119,12 @@ if __name__ == '__main__':
 					message = emailContent
 
 					for recipient_numbers in recipient_numbers:
-						message = client.messages.create(
+						m = client.messages.create(
         								to=recipient_numbers,
         								from_=twilio_number,
         								body=message
 										)
-						print('Message sent to', recipient_numbers, 'with SID:', message.sid, '\n')
+						print('Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
 					
 					# message = client.messages.create(
     				# 				to=recipient_number,
@@ -153,12 +153,12 @@ if __name__ == '__main__':
 					message = emailContent
 
 					for recipient_numbers in recipient_numbers:
-						message = client.messages.create(
+						m = client.messages.create(
         								to=recipient_numbers,
         								from_=twilio_number,
         								body=message
 										)
-						print('Message sent to', recipient_numbers, 'with SID:', message.sid, '\n')
+						print('Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
 					# message = client.messages.create(
     				# 				to=recipient_number,
     				# 				from_=twilio_number,
@@ -187,12 +187,12 @@ if __name__ == '__main__':
 					message = emailContent
 
 					for recipient_numbers in recipient_numbers:
-						message = client.messages.create(
+						m = client.messages.create(
         								to=recipient_numbers,
         								from_=twilio_number,
         								body=message
 										)
-						print('Message sent to', recipient_numbers, 'with SID:', message.sid, '\n')
+						print('Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
 					# message = client.messages.create(
     				# 				to=recipient_number,
     				# 				from_=twilio_number,
@@ -229,12 +229,12 @@ if __name__ == '__main__':
 
 					# print('Message SID:', message.sid)
 					for recipient_numbers in recipient_numbers:
-						message = client.messages.create(
+						m = client.messages.create(
         								to=recipient_numbers,
         								from_=twilio_number,
         								body=message
 										)
-						print('Message sent to', recipient_numbers, 'with SID:', message.sid, '\n')
+						print('Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
 
 					
 					updateSheet([voltage, freq, dt, "Freq too low"])

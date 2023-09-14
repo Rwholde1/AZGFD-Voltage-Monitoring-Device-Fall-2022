@@ -1,8 +1,6 @@
 from flask import Flask, request, make_response
 import json
-from event import Student
-
-
+from event import Event
 
 app = Flask(__name__)
 '''
@@ -15,9 +13,9 @@ frequency (Hz) -- double
 
 @app.route("/", methods=["GET"])
 def index():
-    student = Student(10, "James", "Franco")
+    event = Event(10, "timestamp", "voltage", "frequency")
 
-    return json.dumps(student.__dict__)
+    return json.dumps(event.__dict__)
 
 @app.route("/post", methods=["POST"])
 def pushToDatabase():
@@ -42,7 +40,7 @@ def getFromDatabase():
     id = request.args.get('id')
     if(firstName and lastName and id):
         if firstName == "Nick" and lastName == "Roberts" and id == "101":
-            return json.dumps(Student(id, firstName, lastName).__dict__)
+            return json.dumps(Event(10, "timestamp", "voltage", "frequency").__dict__)
     response = make_response()
     response.status_code = 418
     return response

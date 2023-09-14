@@ -1,9 +1,18 @@
-from flask import Flask, jsonify, request, make_response
+from flask import Flask, request, make_response
 import json
-from student import Student
-import requests
+from event import Student
+
+
 
 app = Flask(__name__)
+'''
+class Event:
+id (auto generated) - integer auto incremented
+timestamp local time UTC - xxx -- DateTime
+voltage (V) -- double
+frequency (Hz) -- double
+'''
+
 @app.route("/", methods=["GET"])
 def index():
     student = Student(10, "James", "Franco")

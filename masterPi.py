@@ -4,6 +4,8 @@ from twilio.rest import Client
 from datetime import datetime
 from gpiozero import CPUTemperature
 
+#recovery code
+#ZQ88RXE9XALRN4SNNFK3HEAR
 #Email stuff
 
 SMTP_SERVER = 'smtp.gmail.com'              #Email Server (don't change!)

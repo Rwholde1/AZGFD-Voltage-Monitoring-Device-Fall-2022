@@ -1,0 +1,30 @@
+
+const int voltagePin = A0; // analog input pin for voltage measurement
+const int frequencyPin = 2; // interrupt input pin for frequency measurement
+volatile unsigned int pulseCount = 0;
+float voltage = 0.0;
+float frequency = 0.0;
+
+void setup() {
+  Serial.begin(9600); // initialize serial communication for debugging
+  pinMode(voltagePin, INPUT);
+  pinMode(frequencyPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(frequencyPin), countPulse, RISING); // interrupt on rising edge of pulse
+}
+
+void loop() {
+  attachInterrupt(digitalPinToInterrupt(frequencyPin), countPulse, RISING); // interrupt on rising edge of pulse
+  voltage = analogRead(voltagePin) * (5.0 / 1023.0); // convert analog voltage reading to voltage value
+  frequency = pulseCount * 1000.0 / (millis() * 2.0); // calculate frequency from pulse count and elapsed time
+  pulseCount = 0; // reset pulse count
+  //Serial.print("Voltage: ");
+  Serial.println(voltage);
+  //Serial.print(" V, Frequency: ");
+  Serial.println(frequency);
+ //Serial.println(" Hz\n");
+  delay(1000); // wait for 1 second
+}
+
+void countPulse() {
+  pulseCount++; // increment pulse count on interrupt
+}

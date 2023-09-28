@@ -1,6 +1,11 @@
 from flask import Flask, request, make_response
 import json
 from event import Event
+from firebase_admin import credentials, firestore, initialize_app
+
+cred = credentials.Certificate('azgfd-epics-firebase-adminsdk-k222y-b12e3ae9ac.json')
+default_app = initialize_app(cred)
+database = firestore.client()
 
 app = Flask(__name__)
 '''
@@ -13,6 +18,8 @@ frequency (Hz) -- double
 
 @app.route("/", methods=["GET"])
 def index():
+
+
     event = Event(10, "timestamp", "voltage", "frequency")
 
     return json.dumps(event.__dict__)

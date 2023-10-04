@@ -6,4 +6,4 @@ class Event:
         self.frequency = frequency
 
     def __repr__(self):
-        print("[ID : {{]")
+        print(f"[ID: {self.id}] [Timestamp: {self.timestamp}] [Voltage: {self.voltage}] [Frequency: {self.frequency}]")

@@ -1,3 +1,12 @@
+'''
+Datetime Format: YYYY-MM-DDTHH:MM:SS.NS
+Date Format: YYYY-MM-DD
+
+
+
+'''
+
+
 from flask import Flask, request, make_response
 import json
 from event import Event
@@ -96,18 +105,86 @@ def pushToDatabase():
     response.data = json.dumps(newEvent.__dict__)
     return response
 
+#will get the most recent entry by default
 @app.route("/get", methods=["GET"])
 def getFromDatabase():
     if request.method != "GET":
         response = make_response()
         response.status_code = 400
         return response
+
+    testcollection = database.collection("testcollection1")
+    count = testcollection.count().get()[0][0].value
+    document = testcollection.document(f"event{count}")
+    document = document.get()
+    document = document.to_dict()
+    print(document)
+
+    #TODO: Find a way to return the correct id of the event
+    newEvent = Event(0, document["date"].isoformat(), document["voltage"] , document["frequency"])
+
+    response = make_response()
+    response.status_code = 418
+    response.data = json.dumps(newEvent.__dict__)
+    return response
+
+@app.route("/getdate/<date>", methods=["GET"])
+def getByDate(date):
+    if request.method != "GET":
+        response = make_response()
+        response.status_code = 400
+        return response
+
+
+
+
     firstName = request.args.get('firstname')
     lastName = request.args.get('lastname')
     id = request.args.get('id')
     if(firstName and lastName and id):
         if firstName == "Nick" and lastName == "Roberts" and id == "101":
             return json.dumps(Event(10, "timestamp", "voltage", "frequency").__dict__)
+    response = make_response()
+    response.status_code = 418
+    return response
+
+@app.route("/getdate/<date>", methods=["GET"])
+def getByDateTime(datetime):
+    if request.method != "GET":
+        response = make_response()
+        response.status_code = 400
+        return response
+
+
+
+
+    firstName = request.args.get('firstname')
+    lastName = request.args.get('lastname')
+    id = request.args.get('id')
+    if(firstName and lastName and id):
+        if firstName == "Nick" and lastName == "Roberts" and id == "101":
+            return json.dumps(Event(10, "timestamp", "voltage", "frequency").__dict__)
+    response = make_response()
+    response.status_code = 418
+    return response
+
+@app.route("/getlast", methods=["GET"])
+def getLast():
+    if request.method != "GET":
+        response = make_response()
+        response.status_code = 400
+        return response
+
+    count = request.args.get('count')
+
+    if(not count):
+        response = make_response()
+        response.status_code = 400
+        return response
+
+
+
+
     response = make_response()
     response.status_code = 418
     return response

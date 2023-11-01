@@ -9,10 +9,14 @@ Date Format: YYYY-MM-DD
 
 from flask import Flask, request, make_response
 import json
+
+
+from google.cloud.firestore_v1 import FieldFilter
+
+
 from event import Event
 from firebase_admin import credentials, firestore, initialize_app
-from datetime import datetime
-from google.api_core.datetime_helpers import DatetimeWithNanoseconds
+import datetime
 
 cred = credentials.Certificate('azgfd-epics-firebase-adminsdk-k222y-b12e3ae9ac.json')
 default_app = initialize_app(cred)
@@ -35,8 +39,13 @@ def index():
     EventsList = []
     Dumps = []
 
+
+
+
     for doc in docs:
-        newEvent = Event(doc.id, doc.to_dict()["date"].isoformat(), doc.to_dict()["voltage"], doc.to_dict()["frequency"])
+        parsedDateTime = datetime.datetime.strptime(doc.to_dict()["date"] + "T" + doc.to_dict()["time"], "%Y-%m-%dT%H:%M:%S")
+
+        newEvent = Event(doc.id, parsedDateTime.isoformat(), doc.to_dict()["voltage"], doc.to_dict()["frequency"])
         EventsList.append(newEvent)
         Dumps.append(json.dumps(newEvent.__dict__))
         print(f"{doc.id} => {doc.to_dict()}")
@@ -63,8 +72,8 @@ def pushToDatabase():
         response.status_code = 400
         return response
 
-    currentDateTime = datetime.utcnow()
-    print(f"{currentDateTime.isoformat()}")
+    currentDateTime = datetime.datetime.now().replace(microsecond=0)
+    print(f"Date: {currentDateTime.date().isoformat()} Time: {currentDateTime.time().isoformat()}")
     voltage = request.form["voltage"]
     frequency = request.form["frequency"]
 
@@ -93,9 +102,10 @@ def pushToDatabase():
     newEvent = Event(id, currentDateTime.isoformat(), voltage, frequency)
 
     # new date time has to be in format of object DateTimeWithNanoSeconds
-    insertData = { "date": currentDateTime, "voltage": voltage, "frequency": frequency }
+    insertData = { "date": currentDateTime.date().isoformat(), "time": currentDateTime.time().isoformat(), "voltage": voltage, "frequency": frequency }
     print(insertData.__repr__())
 
+    # insert the data in the collection
     document = testcollection.document(id)
     document.set(insertData)
 
@@ -116,96 +126,107 @@ def getFromDatabase():
     testcollection = database.collection("testcollection1")
     count = testcollection.count().get()[0][0].value
     document = testcollection.document(f"event{count}")
+    eventId = document.id
     document = document.get()
     document = document.to_dict()
     print(document)
+    parsedDateTime = datetime.datetime.strptime(document["date"] + "T" + document["time"], "%Y-%m-%dT%H:%M:%S")
 
-    #TODO: Find a way to return the correct id of the event
-    newEvent = Event(0, document["date"].isoformat(), document["voltage"] , document["frequency"])
+    newEvent = Event(eventId, parsedDateTime.isoformat(), document["voltage"] , document["frequency"])
+
+    print(newEvent.__repr__())
 
     response = make_response()
-    response.status_code = 418
+    response.status_code = 200
+    response.content_type = "application/json"
     response.data = json.dumps(newEvent.__dict__)
     return response
 
-@app.route("/getdate/<date>", methods=["GET"])
-def getByDate(date):
+@app.route("/getdate/<dateRequest>", methods=["GET"])
+def getByDate(dateRequest):
     if request.method != "GET":
         response = make_response()
         response.status_code = 400
         return response
 
+    # date format should be YYYY-MM-DD
 
+    datetimeformat = '%Y-%m-%d'
+    # convert from string format to datetime format
+    date = datetime.datetime.strptime(dateRequest, datetimeformat)
+    #date = date.astimezone(datetime.timezone.utc)
+    dateRequest = date.date().isoformat()
+    print(dateRequest)
 
+    print(date.__repr__())
+    docs = (
+        database.collection("testcollection1").where(filter=FieldFilter("date", "==", dateRequest)).stream()
+    )
 
-    firstName = request.args.get('firstname')
-    lastName = request.args.get('lastname')
-    id = request.args.get('id')
-    if(firstName and lastName and id):
-        if firstName == "Nick" and lastName == "Roberts" and id == "101":
-            return json.dumps(Event(10, "timestamp", "voltage", "frequency").__dict__)
+    EventsList = []
+
+    for doc in docs:
+        data = doc.to_dict()
+        parsedDateTime = datetime.datetime.strptime(data["date"] + "T" + data["time"], "%Y-%m-%dT%H:%M:%S")
+        EventsList.append(Event(id=doc.id, timestamp=parsedDateTime.isoformat(), voltage=data["voltage"], frequency=data["frequency"]))
+
     response = make_response()
-    response.status_code = 418
+    response.data = json.dumps([event.__dict__ for event in EventsList])
+    response.content_type = "application/json"
+    response.status_code = 200
     return response
 
-@app.route("/getdate/<date>", methods=["GET"])
+@app.route("/getdatetime", methods=["GET"])
 def getByDateTime(datetime):
     if request.method != "GET":
         response = make_response()
         response.status_code = 400
         return response
 
+    dateRequest = request.args.get('date')
+
+    datetimeformat = '%Y-%m-%d'
+    # convert from string format to datetime format
+    #date = datetime.datetime.strptime(dateRequest, datetimeformat)
+    #date = date.astimezone(datetime.timezone.utc)
+    #dateRequest = date.date().isoformat()
+
+    hour = request.args.get('hour')
+    minutes = request.args.get('minutes')
+    seconds = request.args.get('seconds')
 
 
-
-    firstName = request.args.get('firstname')
-    lastName = request.args.get('lastname')
-    id = request.args.get('id')
-    if(firstName and lastName and id):
-        if firstName == "Nick" and lastName == "Roberts" and id == "101":
-            return json.dumps(Event(10, "timestamp", "voltage", "frequency").__dict__)
-    response = make_response()
-    response.status_code = 418
-    return response
-
-@app.route("/getlast", methods=["GET"])
-def getLast():
-    if request.method != "GET":
-        response = make_response()
-        response.status_code = 400
-        return response
-
-    count = request.args.get('count')
-
-    if(not count):
-        response = make_response()
-        response.status_code = 400
-        return response
+    time = hour + ":" + minutes + ":" + seconds
 
 
-
+    docs = (
+        database.collection("testcollection1").where(filter=FieldFilter("date", "==", dateRequest)).where(filter=FieldFilter("time", "==", time))
+    )
 
     response = make_response()
     response.status_code = 418
     return response
 
-@app.route("/delete", methods=["DELETE"])
-def deleteFromDatabase():
-    if request.method != "DELETE":
-        response = make_response()
-        response.status_code = 400
-        return response
-    return "DELETE"
+# @app.route("/delete", methods=["DELETE"])
+# def deleteFromDatabase():
+#     if request.method != "DELETE":
+#         response = make_response()
+#         response.status_code = 400
+#         return response
+#     return "DELETE"
 
-@app.route("/put", methods=["PUT"])
+@app.route("/put/id", methods=["PUT"])
 def updateDatabase():
     if request.method != "PUT":
         response = make_response()
         response.status_code = 400
         return response
+
+
+
+
     return "PUT"
 
 
 if __name__ == "__main__":
     app.run(debug=True)
-    print("Hello world!")

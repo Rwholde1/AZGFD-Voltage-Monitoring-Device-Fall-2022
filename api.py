@@ -176,57 +176,5 @@ def getByDate(dateRequest):
     response.status_code = 200
     return response
 
-@app.route("/getdatetime", methods=["GET"])
-def getByDateTime(datetime):
-    if request.method != "GET":
-        response = make_response()
-        response.status_code = 400
-        return response
-
-    dateRequest = request.args.get('date')
-
-    datetimeformat = '%Y-%m-%d'
-    # convert from string format to datetime format
-    #date = datetime.datetime.strptime(dateRequest, datetimeformat)
-    #date = date.astimezone(datetime.timezone.utc)
-    #dateRequest = date.date().isoformat()
-
-    hour = request.args.get('hour')
-    minutes = request.args.get('minutes')
-    seconds = request.args.get('seconds')
-
-
-    time = hour + ":" + minutes + ":" + seconds
-
-
-    docs = (
-        database.collection("testcollection1").where(filter=FieldFilter("date", "==", dateRequest)).where(filter=FieldFilter("time", "==", time))
-    )
-
-    response = make_response()
-    response.status_code = 418
-    return response
-
-# @app.route("/delete", methods=["DELETE"])
-# def deleteFromDatabase():
-#     if request.method != "DELETE":
-#         response = make_response()
-#         response.status_code = 400
-#         return response
-#     return "DELETE"
-
-@app.route("/put/id", methods=["PUT"])
-def updateDatabase():
-    if request.method != "PUT":
-        response = make_response()
-        response.status_code = 400
-        return response
-
-
-
-
-    return "PUT"
-
-
 if __name__ == "__main__":
     app.run(debug=True)

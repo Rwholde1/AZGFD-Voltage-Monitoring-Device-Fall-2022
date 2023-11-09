@@ -37,25 +37,12 @@ def index():
     docs = testcollection.stream()
 
     EventsList = []
-    Dumps = []
-
-
-
 
     for doc in docs:
         parsedDateTime = datetime.datetime.strptime(doc.to_dict()["date"] + "T" + doc.to_dict()["time"], "%Y-%m-%dT%H:%M:%S")
 
         newEvent = Event(doc.id, parsedDateTime.isoformat(), doc.to_dict()["voltage"], doc.to_dict()["frequency"])
         EventsList.append(newEvent)
-        Dumps.append(json.dumps(newEvent.__dict__))
-        print(f"{doc.id} => {doc.to_dict()}")
-
-
-
-    event = Event(10, "timestamp", "voltage", "frequency")
-
-    for event in EventsList:
-        print(event.__repr__())
 
     response = make_response()
     response.status_code = 200
@@ -77,8 +64,15 @@ def pushToDatabase():
     voltage = request.form["voltage"]
     frequency = request.form["frequency"]
 
-    if(not voltage or not frequency):
+    if(not voltage):
         response = make_response()
+        response.data = "Voltage is not present"
+        response.status_code = 400
+        return response
+
+    if(not frequency):
+        response = make_response()
+        response.data = "Frequency is not present"
         response.status_code = 400
         return response
 
@@ -90,8 +84,15 @@ def pushToDatabase():
         response.status_code = 400
         return response
 
-    if(voltage < 0 or frequency < 0):
+    if(voltage < 0):
         response = make_response()
+        response.data = "Voltage can not be negative"
+        response.status_code = 400
+        return response
+
+    if(frequency < 0):
+        response = make_response()
+        response.data = "Frequency can not be negative"
         response.status_code = 400
         return response
 
@@ -151,10 +152,24 @@ def getByDate(dateRequest):
 
     # date format should be YYYY-MM-DD
 
+    if(not dateRequest):
+        response = make_response()
+        response.data = "Date is not present"
+        response.status_code = 400
+        return response
+
+
     datetimeformat = '%Y-%m-%d'
     # convert from string format to datetime format
-    date = datetime.datetime.strptime(dateRequest, datetimeformat)
-    #date = date.astimezone(datetime.timezone.utc)
+    date = None
+    try:
+        date = datetime.datetime.strptime(dateRequest, datetimeformat)
+    except ValueError:
+        response = make_response()
+        response.status_code = 400
+        response.data = "Incorrect date format"
+        return response
+
     dateRequest = date.date().isoformat()
     print(dateRequest)
 

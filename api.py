@@ -1,9 +1,13 @@
 '''
-Datetime Format: YYYY-MM-DDTHH:MM:SS.NS
+Datetime Format: YYYY-MM-DDTHH:MM:SS
 Date Format: YYYY-MM-DD
-
-
-
+'''
+'''
+class Event:
+id -- string
+timestamp local time UTC - xxx -- DateTime
+voltage (V) -- double
+frequency (Hz) -- double
 '''
 
 
@@ -13,34 +17,31 @@ import json
 
 from google.cloud.firestore_v1 import FieldFilter
 
-
 from event import Event
 from firebase_admin import credentials, firestore, initialize_app
 import datetime
+
+import dotenv
+import os
+dotenv.load_dotenv()
 
 cred = credentials.Certificate('azgfd-epics-firebase-adminsdk-k222y-b12e3ae9ac.json')
 default_app = initialize_app(cred)
 database = firestore.client()
 
 app = Flask(__name__)
-'''
-class Event:
-id (auto generated) - integer auto incremented
-timestamp local time UTC - xxx -- DateTime
-voltage (V) -- double
-frequency (Hz) -- double
-'''
 
+COLLECTION_ID = os.getenv('COLLECTION_ID')
+databaseCollection = database.collection(COLLECTION_ID)
 @app.route("/", methods=["GET"])
 def index():
-    testcollection = database.collection("testcollection1")
-    docs = testcollection.stream()
+
+    documents = databaseCollection.stream()
 
     EventsList = []
 
-    for doc in docs:
+    for doc in documents:
         parsedDateTime = datetime.datetime.strptime(doc.to_dict()["date"] + "T" + doc.to_dict()["time"], "%Y-%m-%dT%H:%M:%S")
-
         newEvent = Event(doc.id, parsedDateTime.isoformat(), doc.to_dict()["voltage"], doc.to_dict()["frequency"])
         EventsList.append(newEvent)
 
@@ -96,18 +97,17 @@ def pushToDatabase():
         response.status_code = 400
         return response
 
-    testcollection = database.collection("testcollection1")
-    count = testcollection.count().get()[0][0].value + 1
+    count = databaseCollection.count().get()[0][0].value + 1
 
-    id = f"event{count}"
-    newEvent = Event(id, currentDateTime.isoformat(), voltage, frequency)
+    eventId = f"event{count}"
+    newEvent = Event(eventId, currentDateTime.isoformat(), voltage, frequency)
 
     # new date time has to be in format of object DateTimeWithNanoSeconds
     insertData = { "date": currentDateTime.date().isoformat(), "time": currentDateTime.time().isoformat(), "voltage": voltage, "frequency": frequency }
     print(insertData.__repr__())
 
     # insert the data in the collection
-    document = testcollection.document(id)
+    document = databaseCollection.document(eventId)
     document.set(insertData)
 
     response = make_response()
@@ -124,18 +124,15 @@ def getFromDatabase():
         response.status_code = 400
         return response
 
-    testcollection = database.collection("testcollection1")
-    count = testcollection.count().get()[0][0].value
-    document = testcollection.document(f"event{count}")
+    databaseCount = databaseCollection.count().get()[0][0].value
+    document = databaseCollection.document(f"event{databaseCount}")
     eventId = document.id
     document = document.get()
     document = document.to_dict()
-    print(document)
+
     parsedDateTime = datetime.datetime.strptime(document["date"] + "T" + document["time"], "%Y-%m-%dT%H:%M:%S")
 
     newEvent = Event(eventId, parsedDateTime.isoformat(), document["voltage"] , document["frequency"])
-
-    print(newEvent.__repr__())
 
     response = make_response()
     response.status_code = 200
@@ -174,13 +171,13 @@ def getByDate(dateRequest):
     print(dateRequest)
 
     print(date.__repr__())
-    docs = (
-        database.collection("testcollection1").where(filter=FieldFilter("date", "==", dateRequest)).stream()
+    documents = (
+        databaseCollection.where(filter=FieldFilter("date", "==", dateRequest)).stream()
     )
 
     EventsList = []
 
-    for doc in docs:
+    for doc in documents:
         data = doc.to_dict()
         parsedDateTime = datetime.datetime.strptime(data["date"] + "T" + data["time"], "%Y-%m-%dT%H:%M:%S")
         EventsList.append(Event(id=doc.id, timestamp=parsedDateTime.isoformat(), voltage=data["voltage"], frequency=data["frequency"]))

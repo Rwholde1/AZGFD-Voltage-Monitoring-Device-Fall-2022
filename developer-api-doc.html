@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AZGFD Api Documentation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div class="container-fluid">
+
+        <div class="p-3 bg-dark text-white text-center row title-section">
+            <h1>AZGFD Api.py Developer Documentation</h1>
+        </div>
+
+
+    </div>
+
+
+    <div class="col-lg-10 mt-3 container">
+        <div class="setup-section">
+            <h2>Project Setup Tutorial</h2>
+        </div>
+
+        <hr />
+
+        <div class="col-lg-8 text-light p-3 bg-dark rounded">
+            <h2 class="text-primary">Setting Up Correct Database Connection</h2>
+            <div class="mt-4 setup-tutorial-content">
+                <h5 class="text-primary">Setting Up the Certificate</h5>
+                <hr/>
+                <p>This particular portion of code sets up the authorization credentials in order to initialize a connection and allow access to the Firestore database.</p>
+                <code>cred = credentials.Certificate('azgfd-epics-firebase-adminsdk-k222y-b12e3ae9ac.json')</code>
+
+                <p>In order to claim this certificate, follow these steps:</p>
+                <ol>
+                    <li>Login to the firebase under the credentials in the documentation.</li>
+                    <li>Go to the console/dashboard of the AZGFD project.</li>
+                    <li>Next to the Project Overview tab in the top left, press the settings cog, go to Project Settings.</li>
+                    <li>Go to the service accounts tab, Firebase Admin SDK, and at the bottom press the Generate New Private Key button.</li>
+                    <li>Drop that file in the directory with the api.py file, and then change the text inside the credentials.Certificate function call to the new .json file you just generated.</li>
+                </ol>
+                <hr/>
+                <h5 class="text-primary">Setting up the .env file</h5>
+                <p>Having a .env file allows you to have private and secret keys that will not be public when pushing to a public repository. In this case it is used for the collection id to find the document set within the firestore.</p>
+                <code>COLLECTION_ID = os.getenv('COLLECTION_ID')</code>
+                <p>This code is responsible for getting the collection id store in the .env local file in the same directory, and storing it in a local variable to be used later down the line. <span class="text-danger">NEVER push the .env file to github or any public code sharing platform as that defeats the purpose of using it.</span></p>
+                <h6>How to setup the .env file</h6>
+                <ol>
+                    <li>Create a file named .env in the same directory as the api.py file</li>
+                    <li>Enter text in this format: COLLECTION_ID="some_collection_name", and replace some_collection_name with the proper collection name in the database. If the database changes, this must change to.</li>
+                </ol>
+                <p>Be aware that you can store many values in this format. Look up how to use .env file with python on google if you want to learn more.</p>
+                <hr/>
+
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-8 mt-3 mb-3 text-light p-3 bg-dark rounded">
+            <h2 class="text-primary">API Functionalities</h2>
+            <div class="mt-4 setup-tutorial-content">
+                <h5 class="text-primary">How to use the API without hosting it</h5>
+                <p>Run the api.py file and it should automatically setup the localhost hosting server. You can use the localhost with port 5000 to test the api calls through a web browser. I use <a href="https://www.postman.com/">Postman</a> to test the API because some calls need to be POST, PUT, or DELETE specifically, which can not be done by just navigating to a link through a web browser. Any GET requests will work though.</p>
+                <p>A big reason I like Postman is because it allows you to test the POST requests by inputting form data without a web based form, so that makes it pretty easy.</p>
+
+                <hr/>
+                <h5 class="text-primary">GET requests</h5>
+                <h6>"/" endpoint (default)</h6>
+                <p>This is the default endpoint. When you navigate to the default hosting location (ie localhost:5000/), this is the function that will be called.</p>
+                <p>It returns a query with all the events in the database. It returns as a JSON document that displays in the browser, or wherever the response is displayed.</p>
+                <hr/>
+                <h6>"/get" endpoint</h6>
+                <p>This endpoint returns the latest event that was pushed to the database.</p>
+                <hr/>
+                <h6>"/getdate/&ltdateRequest&gt" endpoint</h6>
+                <p>This endpoint uses the date requested as a paremeter in the request url.</p>
+                <p>It is important to use the YYYY-MM-DD format when passing this parameter into the URL, or it will reject it.</p>
+                <hr/>
+                <h5 class="text-primary">POST requests</h5>
+                <p>"/post" endpoint</p>
+                <p><span class="text-danger">!!!</span> This endpoint requires a form submission, in the request. This is not something you can do using a regular we browser unless you make some kind of form submission. Use <a href="https://www.postman.com/">Postman</a> to make a form and send the POST request.</p>
+                <p>Here are the required fields for the post request:</p>
+                <ul>
+                    <li>Voltage (float)</li>
+                    <li>Frequency (float)</li>
+                    <li>Date (YYYY-MM-DD)</li>
+                    <li>Time (HH:MM:SS) <span class="text-secondary">(will be in local AZ time)</span></li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

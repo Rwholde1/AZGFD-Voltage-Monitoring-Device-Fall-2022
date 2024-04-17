@@ -33,12 +33,13 @@ MIN_VOLTS = 110.0
 MAX_FREQ = 65.0
 MIN_FREQ = 55.0
 
+textSent = False
+textInterval = 300.0
+textSendTime = 0
+currentTime = 0
 
-consecutiveOB = 3
-outOfBoundsV = 0
-outOfBoundsF = 0
-readError = 0
-maxErrors = 6
+#readError = 0
+#maxErrors = 6
 
 def getDateTime():
 	now = datetime.now()
@@ -47,18 +48,11 @@ def getDateTime():
 	
 #dt = getDateTime()
 message = ""
-#("Voltage critically high: ", voltage, " volts. Measurement taken at ", dt)
+#("Voltage critically high: " + voltage + " volts. Measurement taken at " + dt)
 
 
 if __name__ == '__main__':
 	print("Reading from Arduino")
-	#for recipient_numbers in recipient_numbers:
-	#					m = client.messages.create(
-     #  								to=recipient_numbers,
-      #  								from_=twilio_number,
-       # 								body=message
-		#								)
-		#				print('Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
 	time.sleep(3)
 	# Arduino connection through USB port 
 	while True:
@@ -74,18 +68,35 @@ if __name__ == '__main__':
 		
 	print("Successfully connected with arduino")
 	while True:
-		#try:
-		
 		# check if the CPU is overheating
 		if (CPUTemperature().temperature > 80.0):
 			print("System overheating, shutting down.")
+			dt = getDateTime()
+			message = "System overheating, shutting down at " + dt + ". Please restart the script."
+
+			for recipient_number in recipient_numbers:
+				m = client.messages.create(
+        						to=recipient_number,
+        						from_=twilio_number,
+        						body=message
+								)
+				print('Max Volts Message sent to', recipient_number, 'with SID:', m.sid, '\n')
 			break
 		
+		if textSent:
+			currentTime = time.time()
+			timeDifference = currentTime - textSendTime
+			# if the last text was sent more than 5 minutes ago
+			if timeDifference > textInterval:
+				# a text is allowed to be sent
+				textSent = False
+				textSendTime = 0
+				currentTime = 0
+
 		# collect measurements from Arduino
 		if ser.in_waiting > 0:
 			
 			startT = time.time()
-			#start = datetime.now()
 
 			# Add defaults
 			voltage = ser.readline().decode('utf-8').rstrip()
@@ -97,106 +108,82 @@ if __name__ == '__main__':
 			
 			
 			# voltage too high
-			if (float(voltage) > MAX_VOLTS):
-				
-				outOfBoundsV += 1
-				readError += 1
-				
-				if outOfBoundsV >= consecutiveOB: 
-					dt = getDateTime()
+			if ((float(voltage) > MAX_VOLTS) and (textSent == False)):
+				dt = getDateTime()
 					
-					emailContent = ("Voltage critically high: ", voltage, " volts. Measurement taken at ", dt)
-					
-					message = emailContent
+				message = "Voltage critically high: " + voltage + " volts. Measurement taken at " + dt
 
-					for recipient_numbers in recipient_numbers:
-						m = client.messages.create(
-        								to=recipient_numbers,
-        								from_=twilio_number,
-        								body=message
-										)
-						print('Max Volts Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
-					outOfBoundsV = 0
+				for recipient_number in recipient_numbers:
+					m = client.messages.create(
+        							to=recipient_number,
+        							from_=twilio_number,
+        							body=message
+									)
+					print('Max Volts Message sent to', recipient_number, 'with SID:', m.sid, '\n')
+				
+				textSent = True
+				textSendTime = time.time()
 						
 			# voltage too low
-			elif (float(voltage) < MIN_VOLTS):
-				
-				outOfBoundsV += 1
-				readError += 1
-	
-				if outOfBoundsV >= consecutiveOB: 
-					dt = getDateTime()
+			elif ((float(voltage) < MIN_VOLTS) and (textSent == False)):
+				dt = getDateTime()
 					
-					emailContent = ("Voltage critically low: ", voltage, " volts. Measurement taken at ", dt)
+				message = "Voltage critically low: " + voltage + " volts. Measurement taken at " + dt
 
-					message = emailContent
-
-					for recipient_numbers in recipient_numbers:
-						m = client.messages.create(
-        								to=recipient_numbers,
-        								from_=twilio_number,
-        								body=message
-										)
-						print('Min Volts Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
+				for recipient_number in recipient_numbers:
+					m = client.messages.create(
+        							to=recipient_number,
+        							from_=twilio_number,
+        							body=message
+									)
+					print('Min Volts Message sent to', recipient_number, 'with SID:', m.sid, '\n')
 					
-					outOfBoundsV = 0
+				textSent = True
+				textSendTime = time.time()
 					
 			# Frequency too high
-			if (float(freq) > MAX_FREQ):
-				
-				outOfBoundsF += 1
-				readError += 1
-				
-				if outOfBoundsF >= consecutiveOB: 
-					dt = getDateTime()
+			if ((float(freq) > MAX_FREQ) and (textSent == False)):
+				dt = getDateTime()
 					
-					emailContent = ("Frequency critically high: ", freq, " Hz. Measurement taken at ", dt)
+				message = "Frequency critically high: " + freq + " hertz. Measurement taken at " + dt
 
-					message = emailContent
-
-					for recipient_numbers in recipient_numbers:
-						m = client.messages.create(
-        								to=recipient_numbers,
-        								from_=twilio_number,
-        								body=message
-										)
-						print('Max Freq Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
+				for recipient_number in recipient_numbers:
+					m = client.messages.create(
+        							to=recipient_number,
+        							from_=twilio_number,
+        							body=message
+									)
+					print('Max Freq Message sent to', recipient_number, 'with SID:', m.sid, '\n')
 					
-					outOfBoundsF = 0
+				textSent = True
+				textSendTime = time.time()
 				
 			# Frequency too low
-			elif (float(freq) < MIN_FREQ):
-				
-				outOfBoundsF += 1
-				readError += 1
-				
-				if outOfBoundsF >= consecutiveOB: 
-					dt = getDateTime()
+			elif ((float(freq) < MIN_FREQ) and (textSent == False)):
+				dt = getDateTime()
 					
-					emailContent = ("Frequency critically low: ", freq, " Hz. Measurement taken at ", dt)
-
-					message = emailContent
-					for recipient_numbers in recipient_numbers:
-						m = client.messages.create(
-        								to=recipient_numbers,
-        								from_=twilio_number,
-        								body=message
-										)
-						print('Min Freq Message sent to', recipient_numbers, 'with SID:', m.sid, '\n')
+				message = "Frequency critically low: " + freq + " hertz. Measurement taken at " + dt
+				
+				for recipient_number in recipient_numbers:
+					m = client.messages.create(
+        							to=recipient_number,
+        							from_=twilio_number,
+        							body=message
+									)
+					print('Min Freq Message sent to', recipient_number, 'with SID:', m.sid, '\n')
 					
-					outOfBoundsF = 0
+				textSent = True
+				textSendTime = time.time()
 			
-			if readError > maxErrors:
-				readError = 0
-				print("Rebooting")
-				os.system("python3 reboot.py")
-				client.auth_reset()
-				time.sleep(1)
-				quit()
+			#Unused functionality, but a useful fragment if we want to reboot
+			#if readError > maxErrors:
+				#readError = 0
+				#print("Rebooting")
+				#os.system("python3 reboot.py")
+				#client.auth_reset()
+				#time.sleep(1)
+				#quit()
 			
 			time.sleep(1)
-			#end = datetime.now()
 			endT = time.time()
 			print(int(endT-startT), "seconds")
-			
-			#print(end-start)
